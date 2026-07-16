@@ -2,7 +2,7 @@ cff-version: 1.2.0
 message: "If you use this crosswalk, please cite it as below."
 title: "IHDS District Crosswalk"
 authors:
-  - family-names: "[YOUR LAST NAME]"
-    given-names: "[YOUR FIRST NAME]"
+  - family-names: "Nikhil"
+    given-names: "Gajbhiye"
 date-released: 2026-07-16
-url: "https://github.com/[YOUR-GITHUB-USERNAME]/[REPO-NAME]"
+url: "https://github.com/nikhil-gajbhiye/ihds-district-crosswalk"
