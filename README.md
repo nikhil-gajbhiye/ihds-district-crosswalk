@@ -77,3 +77,14 @@ ICPSR 22626 and 36151).
 Code (`lookup.py`) is released under the MIT License — see `LICENSE`.
 The crosswalk data (`data/ihds_district_crosswalk.csv`) is released
 under CC-BY 4.0 — see `LICENSE-DATA`.
+
+## Validation
+
+Run `validate.py` from the repo root (requires your own copy of the raw
+ICPSR `.dta` files) to check the crosswalk against real IHDS microdata,
+not just against itself. Results and the current known gaps are in
+`validation/README.md`. Headline numbers as of the last run: 96.73%
+match rate against IHDS-I, 96.19% against IHDS-II — not 100%, and the
+validation folder documents exactly why, including one genuine coverage
+gap (missing Maharashtra `DIST01` codes) that this run surfaced and that
+isn't yet reflected elsewhere in this document.
