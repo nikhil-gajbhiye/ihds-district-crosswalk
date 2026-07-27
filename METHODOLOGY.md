@@ -45,23 +45,26 @@ reference column, explicitly labeled not to be used as a join key.
 ## What the crosswalk covers
 
 The crosswalk maps each 2001-Census district sampled by IHDS-I
-(375 state-district combinations across 33 states/UTs) to its current
-(2026) successor district(s), drawing on real administrative-history
-sourcing (state government notifications, Wikipedia district lists
-cross-checked against contemporaneous news coverage, and — for the one
-case it resolved — a cross-wave codebook lookup) rather than
-assumption.
+(now 377 state-district combinations across 33 states/UTs, after the
+Tamil Nadu and Maharashtra additions below) to its current (2026)
+successor district(s), drawing on real administrative-history sourcing
+(state government notifications, Wikipedia district lists cross-checked
+against contemporaneous news coverage, the official IHDS-I codebook's
+District Codes table, and — for the cases it resolved — cross-wave
+codebook lookups) rather than assumption.
 
-Status breakdown (379 rows delivered; 3 rows dropped as confirmed
+Status breakdown (381 rows delivered; 3 rows dropped as confirmed
 duplicates once `DIST01` resolved them to a single real district):
 
-- **328 CONFIRMED** — multiply-sourced, or directly resolved via
+- **330 CONFIRMED** — multiply-sourced, or directly resolved via
   `DIST01`/`DISTRICT`. A dedicated verification pass upgraded Bihar
   (17 rows — confirmed no new district since Arwal in 2001), Himachal
   Pradesh (9 rows — confirmed stable since 1972), Rajasthan (21 rows —
   cross-checked against three independent news sources on the exact
   2023/2024 district list), and several individual Uttar Pradesh and
-  Chhattisgarh rows from PROVISIONAL to CONFIRMED.
+  Chhattisgarh rows from PROVISIONAL to CONFIRMED. Also includes two
+  rows added in a later pass — Tamil Nadu's Tiruvannamalai and
+  Maharashtra's Mumbai Suburban — see below.
 - **40 PROVISIONAL** — either not individually re-verified against a
   dedicated source, or a genuine multi-parent split that can't be
   fully resolved at the district level alone. Delhi's real revenue
@@ -97,6 +100,35 @@ enough that several of Delhi's rows are marked PROVISIONAL pending
 clearer confirmation of exactly which old district each new one
 succeeded.
 
+## Tamil Nadu and Maharashtra: two gaps found and fixed via primary sourcing
+
+A later validation pass (see `validation/`) cross-checked this
+crosswalk directly against real IHDS microdata and found two genuine
+gaps, both now fixed:
+
+- **Tamil Nadu, Tiruvannamalai (`DIST01=6`)** was simply missing — a
+  plain omission, not a structural limitation. Confirmed present in
+  the IHDS-I codebook's own official District Codes table, and in real
+  household data (45 households in IHDS-I, 41 in IHDS-II). Added as
+  CONFIRMED.
+- **Maharashtra, Mumbai Suburban (`DIST01=22`)** resolves a question
+  this crosswalk had already flagged in its own notes on the Mumbai
+  (23) row. Confirmed via IHDS-II's own `DISTRICT` variable value
+  label ("Mumbai (suburban)," embedded directly in the .dta metadata)
+  — a primary source, not an inference. It has 0 households in IHDS-I
+  and 319 in IHDS-II, meaning Mumbai Suburban only became separately
+  trackable starting with IHDS-II; IHDS-I-only analyses should treat
+  the Mumbai (23) row as covering both Mumbai City and Mumbai Suburban
+  jointly.
+
+A third apparent gap — six other Maharashtra `DIST01` codes (4, 12, 19,
+24, 28, 33) initially flagged as missing — turned out not to be a gap
+at all on closer check: the official IHDS-I codebook's District Codes
+table confirms these exact codes were never part of IHDS's sampling
+frame (0 households in either wave). Maharashtra's original 27-row
+coverage was already complete relative to what IHDS actually sampled;
+only the Mumbai Suburban case above was real.
+
 ## What's still genuinely unresolved, and why
 
 Twelve rows, across five states/UTs — Nagaland, Manipur, Tripura,
@@ -110,6 +142,22 @@ it is a hard limit of the source data, not something a better lookup
 can fix. Any work needing district-level detail in these five
 states/UTs will need a different data source entirely.
 
+**This same limitation is broader than the five states/UTs above.**
+Direct inspection of the raw household files (both waves) shows the
+identical `DISTID=0`/`DIST01=0` pattern in six more states/UTs:
+Chandigarh, Sikkim, Arunachal Pradesh, Mizoram, Dadra & Nagar Haveli,
+and Puducherry — real household counts for all eleven are in
+`validation/state_level_only_states.csv`. These six aren't necessarily
+marked UNRESOLVED in this crosswalk's row-level status column (some
+may carry CONFIRMED or PROVISIONAL name-level reference rows, similar
+in spirit to Nagaland/Manipur/Tripura/Meghalaya), but the underlying
+constraint is identical: **none of these eleven states/UTs can be
+joined back to individual IHDS households at the district level, full
+stop**, regardless of what this crosswalk's status column says for
+them. Treat the crosswalk's coverage for these eleven as name-level
+reference only, not as a working join key, until each is individually
+re-audited against this same standard.
+
 One additional case worth flagging even though it's now resolved:
 Rajasthan went through a 33-to-50-district reorganization in 2023,
 followed by a partial reversal of 9 of those 17 new districts in
@@ -118,6 +166,16 @@ most visible case). The current 41-district structure is reflected
 here, but Rajasthan's district map has been unusually unstable and is
 worth re-checking against a primary source if this crosswalk is used
 much beyond mid-2026.
+
+## Validation
+
+Run `validate.py` from the repo root (requires your own copy of the raw
+ICPSR `.dta` files) to check the crosswalk against real IHDS microdata,
+not just against itself. Full results and known gaps are in
+`validation/README.md`. Current headline numbers: **96.84% match rate
+against IHDS-I, 97.04% against IHDS-II** — not 100%, and the validation
+folder documents exactly why, including the eleven-state structural
+limitation described above.
 
 ## Known open items for a future pass
 
@@ -134,12 +192,20 @@ much beyond mid-2026.
   Arambagh, Sundarban, and a Kolkata reorganization) are included as
   provisional; their notification/implementation status should be
   re-checked before relying on them.
+- The six additional state-level-only states/UTs identified above
+  (Chandigarh, Sikkim, Arunachal Pradesh, Mizoram, Dadra & Nagar
+  Haveli, Puducherry) should each be individually re-audited and, if
+  needed, relabeled consistently with Nagaland/Manipur/Tripura/
+  Meghalaya/Daman & Diu.
 
 ## Data sources
 
 - IHDS-I household file (ICPSR 22626, DS2) and village file (DS7)
 - IHDS-I official household and individual linking files
   (IHDS-I ↔ IHDS-II panel linkage)
+- IHDS-I official documentation (Docrelinfo.pdf), including its
+  District Codes table — used to verify Maharashtra and Tamil Nadu
+  coverage against IHDS's own original sampling frame
 - IHDS-II household file (ICPSR 36151, DS2) and codebook
 - Public sourcing for administrative-history claims: state government
   notifications, Wikipedia district lists, contemporaneous news
