@@ -72,6 +72,8 @@ If this is useful in your own research, please cite this repository
 (Desai, Sonalde and Reeve Vanneman. *India Human Development Survey*,
 ICPSR 22626 and 36151).
 
+DOI 10.5281/zenodo.21631686
+
 ## License
 
 Code (`lookup.py`) is released under the MIT License — see `LICENSE`.
